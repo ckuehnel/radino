@@ -6,9 +6,9 @@
 #define RXLED 17 // green LED
 #define TXLED 18 // red LED
 
-#define RS485      Serial2      // Serial for USB-UART, Serial1 and Serial2 for HW-UART
-#define RS485Speed 9600         // Baudrate
-#define TXEN_PIN   2            //Which pin to use for RS485 functionality - comment to disable
+#define RS485      Serial1      // Serial for USB-UART, Serial1 and Serial2 for HW-UART
+#define RS485Speed 9600        // Baudrate
+#define TXEN_PIN   A5           //Which pin to use for RS485 functionality - comment to disable
 
 #define TXEN_ON() digitalWrite(TXEN_PIN, HIGH)
 #define TXEN_OFF() digitalWrite(TXEN_PIN, LOW)
@@ -20,6 +20,7 @@ void setup() {
   pinMode(TXLED, OUTPUT);
   TXEN_INIT();
   Serial.begin(115200);
+  RS485.begin(RS485Speed);
 }
 
 
@@ -33,5 +34,6 @@ void loop() {
   Serial.println("Hi, there.");
   TXEN_ON();
   RS485.println("RS485 out");
+  delay(20);    // switch off TXEN not before RS485 output is finished ( 1 ms/character @ 9600 Baud)
   TXEN_OFF();
 }
