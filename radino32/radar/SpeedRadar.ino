@@ -11,39 +11,29 @@
 #define TXEN       A5           // RS485 DE
 
 // DEFINE RS485
-#define RS485           Serial1      // Serial for USB-UART, Serial1 and Serial2 for HW-UART
-#define RS485Speed      9600         // Baudrate
+#define RS485      Serial1      // Serial for USB-UART, Serial1 and Serial2 for HW-UART
+#define RS485Speed 9600         // Baudrate
 
-#define TXEN_ON()       digitalWrite(TXEN, HIGH)
-#define TXEN_OFF()      digitalWrite(TXEN, LOW)
+#define TXEN_ON()  digitalWrite(TXEN, HIGH)
+#define TXEN_OFF() digitalWrite(TXEN, LOW)
 
 // DEFINE VALUEs
-#define SERIAL                    Serial                                // USB-UART
-#define SERIAL_SPEED              115200                                // Serial Speed to PC
-#define THRESHOLD                 512                                   // Switching threshold
+#define SERIAL                    Serial        // USB-UART
+#define SERIAL_SPEED              115200        // Serial Speed to PC
+#define THRESHOLD                 512           // Switching threshold
 #define HYSTERESIS_VAL            5
-#define LED_ON_TIME               50                                    // Time for led on in ms
-#define AVERAGE                   4
+#define LED_ON_TIME               50            // Time for led on in ms
 
 #define F_TO_V                    (0.02272727272727272727272727272727)  // 1/44 Hz
-#define V_TO_F                    44                                    // 1 km/h = 44 Hz 
-#define KMPH_TO_MPS               (0.277777778)
-#define MAXV                      200                                   // km/h
-#define MINV                      0.1                                   // km/h 
-#define TIME_NOSIG_MS             (float)(1000/(MINV*V_TO_F))
-#define MIN_VALID_MEASURES        8                                     // Minimal correct values for output
-#define MIN_SPEED                 10                                    // Minimal detected speed
+#define MIN_VALID_MEASURES        8             // Minimal correct values for output
+#define MIN_SPEED                 10            // Minimal detected speed
 
-int series = 0;                                                         // series of compared values
-int v_filter = MIN_SPEED;                                               // Minimal speed for compare
+int series = 0;                                 // series of compared values
+int v_filter = MIN_SPEED;                       // Minimal speed for compare
 
-unsigned long T = 0;                                                    // Period in us
-float f = 0.0;                                                          // Frequency in Hz
-float v = 0.0;                                                          // Speed
-
-unsigned int doppler_div = 19;
-unsigned int samples[AVERAGE];
-unsigned int x;
+unsigned long T = 0;                            // Period in us
+float f = 0.0;                                  // Frequency in Hz
+float v = 0.0;                                  // Speed
 
 void tx_led_out()
 {
@@ -87,26 +77,23 @@ void setup()
   RS485.begin(RS485Speed);
 }
 
-
-
 void loop()
 {
-  int32_t th = 0;                                   // Time for high flank
-  int32_t tl = 0;                                   // Time for low flank
-
+  int32_t th = 0;                               // Time for rising edge
+  int32_t tl = 0;                               // Time for falling edge
   // wait for high flank
   while (analogRead(RADAR) < (THRESHOLD + HYSTERESIS_VAL));
-  th = micros();                                    // Set time high flank in micros
+  th = micros();                                // Set time rising edge in micros
 
   // wait for low flank
   while (analogRead(RADAR) > (THRESHOLD - HYSTERESIS_VAL));
-  tl = micros();                                    // Set time low flank in micros
+  tl = micros();                                // Set time falling edge in micros
 
-  T = (tl - th + 0xFFFF) % 0xFFFF;                  // Period in micros
+  T = (tl - th + 0xFFFF) % 0xFFFF;              // Period in micros
   
-  f = 1 / (float)T;                                 // Frequency in MHz f=1/T
-  f *= 1000000;                                     // Frequency in Hz
-  v = f * F_TO_V;                                   // Speed in km/h
+  f = 1 / (float)T;                             // Frequency in MHz f=1/T
+  f *= 1000000;                                 // Frequency in Hz
+  v = f * F_TO_V;                               // Speed in km/h
   
   if (v >= v_filter)
   {
