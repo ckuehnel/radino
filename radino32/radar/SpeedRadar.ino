@@ -81,11 +81,11 @@ void loop()
 {
   int32_t th = 0;                               // Time for rising edge
   int32_t tl = 0;                               // Time for falling edge
-  // wait for high flank
+  // wait for rising edge
   while (analogRead(RADAR) < (THRESHOLD + HYSTERESIS_VAL));
   th = micros();                                // Set time rising edge in micros
 
-  // wait for low flank
+  // wait for falling edge
   while (analogRead(RADAR) > (THRESHOLD - HYSTERESIS_VAL));
   tl = micros();                                // Set time falling edge in micros
 
